@@ -1,11 +1,16 @@
 package com.jschwery.securitydemo.service.Implementations;
 
 import com.jschwery.securitydemo.entities.User;
+import com.jschwery.securitydemo.entities.UserToken;
+import com.jschwery.securitydemo.event.UserRegisterEmailEvent;
 import com.jschwery.securitydemo.exception.UserException;
 import com.jschwery.securitydemo.model.UserModel;
 import com.jschwery.securitydemo.repository.UserRepository;
+import com.jschwery.securitydemo.repository.UserTokenVerification;
 import com.jschwery.securitydemo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -15,13 +20,19 @@ import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
-
+    @Autowired
+    PasswordEncoder passEncoder;
     UserRepository  userRepository;
+    UserTokenVerification userTokenVerification;
 
     @Autowired
-    public UserServiceImpl(UserRepository repository){
+    public UserServiceImpl(UserRepository repository, UserTokenVerification userTokenRepo){
         this.userRepository = repository;
+        this.userTokenVerification = userTokenRepo;
     }
+
+    @Autowired
+    ApplicationEventPublisher userRegisterPublisher;
 
     @Override
     public User saveUser(UserModel userModel) {
@@ -32,11 +43,18 @@ public class UserServiceImpl implements UserService {
                 email(userModel.getEmail()).
                 firstName(userModel.getFirstName()).
                 lastName(userModel.getLastName()).
-                password(userModel.getPassword()).
+                password(passEncoder.encode(userModel.getPassword())).
                 timeCreated(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))).build();
         User returnedUser = userRepository.save(user);
-        System.out.println(returnedUser.getEmail());
-        System.out.println("userID" + returnedUser.getUserID());
+        userRegisterPublisher.publishEvent(new UserRegisterEmailEvent(returnedUser, "url"));
         return returnedUser;
+    }
+
+    @Override
+    public UserToken addTokenToUser(UserToken ut, User user, String token) {
+        ut.setToken(token);
+        ut.setUser(user);
+        ut.setTokenExpiration(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()).minusMinutes(5)));
+        return userTokenVerification.save(ut);
     }
 }

@@ -25,4 +25,7 @@ public class User {
     String firstName;
     String lastName;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    UserToken userToken;
+
 }
