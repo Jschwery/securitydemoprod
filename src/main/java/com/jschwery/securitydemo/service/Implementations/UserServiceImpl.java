@@ -8,6 +8,7 @@ import com.jschwery.securitydemo.model.UserModel;
 import com.jschwery.securitydemo.repository.UserRepository;
 import com.jschwery.securitydemo.repository.UserTokenVerification;
 import com.jschwery.securitydemo.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +18,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,11 +33,21 @@ public class UserServiceImpl implements UserService {
         this.userTokenVerification = userTokenRepo;
     }
 
-    @Autowired
-    ApplicationEventPublisher userRegisterPublisher;
+
+
+    /*
+    save user model from entered form to database, and map it to a user to store to database
+    when user is saved the event takes place that takes in the user and the url
+
+    new token will be registered to the user
+     */
+
+    public String httpRequestToString(HttpServletRequest request){
+        return String.format("http://%s:%s%s", request.getServerName(), request.getServerPort(), request.getContextPath());
+    }
 
     @Override
-    public User saveUser(UserModel userModel) {
+    public Optional<User> saveUser(UserModel userModel) {
         if(!Objects.equals(userModel.getPassword(), userModel.getMatchPassword())){
             throw new UserException("Passwords do not match");
         }
@@ -46,8 +58,7 @@ public class UserServiceImpl implements UserService {
                 password(passEncoder.encode(userModel.getPassword())).
                 timeCreated(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))).build();
         User returnedUser = userRepository.save(user);
-        userRegisterPublisher.publishEvent(new UserRegisterEmailEvent(returnedUser, "url"));
-        return returnedUser;
+        return Optional.of(returnedUser);
     }
 
     @Override

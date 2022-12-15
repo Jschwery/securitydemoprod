@@ -16,4 +16,6 @@ public class UserRegisterEmailEvent extends ApplicationEvent {
         this.url = urlSent;
         this.user = userToPublish;
     }
+
+
 }
