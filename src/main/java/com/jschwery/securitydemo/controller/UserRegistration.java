@@ -6,6 +6,7 @@ import com.jschwery.securitydemo.exception.UserException;
 import com.jschwery.securitydemo.model.UserModel;
 import com.jschwery.securitydemo.repository.UserRepository;
 import com.jschwery.securitydemo.service.UserService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
