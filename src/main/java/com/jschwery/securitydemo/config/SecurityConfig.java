@@ -27,10 +27,10 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
 @Configuration
-public class SecurityConfig {
+public class SecurityConfig{
     @Bean
     public PasswordEncoder getPassWordEncoder() {
-        return new BCryptPasswordEncoder(11);
+        return new BCryptPasswordEncoder(15);
     }
 
     //reads database info form properties
@@ -51,7 +51,8 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(){
-        //authenitcation providers extract user indentity info based credentials from database
+
+        //authentication providers extract user identity info based credentials from database
         UserDetails user = User.builder()
                 .username("user")
                 .password("password")
@@ -75,9 +76,15 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, RememberMeServices rememberme) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated()).
-                formLogin(form -> form.loginPage("/login"));
+                formLogin(form -> form.loginPage("templates/login").
+                        failureUrl("templates/login-failure"));
+
         return http.build();
     }
+
+
+
+
 }
