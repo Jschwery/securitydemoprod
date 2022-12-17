@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -37,6 +38,11 @@ public class UserRegistration {
 
     public String httpRequestToString(HttpServletRequest request){
         return String.format("http://%s:%s%s", request.getServerName(), request.getServerPort(), request.getContextPath());
+    }
+
+    @RequestMapping("/login.html")
+    public String login() {
+        return "/login.html";
     }
 
 
