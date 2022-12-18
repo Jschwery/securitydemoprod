@@ -28,15 +28,18 @@ import javax.xml.crypto.Data;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 /*
+//TODO
 if the user is an admin they can remove other users from db
 plus all other features of users
 
-HTTP request -> security filter chain
-filter chain -> custom http login page
-same thymeleaf html page has get and post available to post the form details?
-the thymeleaf page should have the oauth google link too
-if user clicks on the google link, provider manager
-
+//TODO
+create roles everyone starts as user when account created
+securityfilterchain ->filters http requests and finds out if the user is authorized to access the endpoints
+providermanager -> find out how to manage the different authentication providers with their authorization
+userdetailsservice -> create user
+//TODO
+Authentication provider -> this will be branched out for oauth
+but now we just have jdbc verification, returns authentication token
 
 
 
@@ -106,7 +109,6 @@ public class SecurityConfig{
         http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated()).
                 formLogin(form -> form.loginPage("templates/login").
                         failureUrl("templates/login-failure"));
-
         return http.build();
     }
 

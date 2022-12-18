@@ -1,12 +1,9 @@
 package com.jschwery.securitydemo.service.Implementations;
 
 import com.jschwery.securitydemo.entities.User;
-import com.jschwery.securitydemo.entities.UserToken;
-import com.jschwery.securitydemo.event.UserRegisterEmailEvent;
 import com.jschwery.securitydemo.exception.UserException;
 import com.jschwery.securitydemo.model.UserModel;
 import com.jschwery.securitydemo.repository.UserRepository;
-import com.jschwery.securitydemo.repository.UserTokenVerification;
 import com.jschwery.securitydemo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl<UserTokenVerification> implements UserService {
     @Autowired
     PasswordEncoder passEncoder;
     UserRepository  userRepository;
@@ -59,13 +56,5 @@ public class UserServiceImpl implements UserService {
                 timeCreated(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))).build();
         User returnedUser = userRepository.save(user);
         return Optional.of(returnedUser);
-    }
-
-    @Override
-    public UserToken addTokenToUser(UserToken ut, User user, String token) {
-        ut.setToken(token);
-        ut.setUser(user);
-        ut.setTokenExpiration(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()).minusMinutes(5)));
-        return userTokenVerification.save(ut);
     }
 }
