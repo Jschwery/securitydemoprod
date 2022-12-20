@@ -1,4 +1,7 @@
-
+server:
+  error:
+    whitelabel:
+      enabled: false
 spring:
   jpa:
     show-sql: true

@@ -1,4 +1,4 @@
-package com.jschwery.securitydemo.model;
+package com.jschwery.securitydemo.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
