@@ -22,13 +22,13 @@ public class CustomSecurityConfig implements AuthenticationProvider {
 
     UserRepository userRepository;
     UserDetailsService userDetailsService;
-
+    //the authentication manager has to pass the authentication to here
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
         User user = userRepository.findByUsername(username).orElseThrow(()->  new UsernameNotFoundException("User not found"));
-        if(Objects.equals(username, user.getUsername()) && Objects.equals(password, user.getPassword())){
+        if(Objects.equals(username, user.getEmail()) && Objects.equals(password, user.getPassword())){
             return new UsernamePasswordAuthenticationToken(userDetailsService.loadUserByUsername(username),
                     userDetailsService.loadUserByUsername(username).getPassword(), userDetailsService.loadUserByUsername(username).getAuthorities());
         }else {

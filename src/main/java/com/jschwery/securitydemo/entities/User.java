@@ -26,8 +26,8 @@ public class User {
     @Column(name = "user_id")
     long userID;
     String email;
-    Timestamp timeCreated;
     String username;
+    Timestamp timeCreated;
     String password;
     String firstName;
     String lastName;

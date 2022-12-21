@@ -37,16 +37,18 @@ public class UserController {
 
     Logger logger = LoggerFactory.getLogger(UserController.class);
     UserService userService;
-    private final AuthenticationManager authenticationManager;
+    private final ProviderManager authenticationManager;
 
 
-    @RequestMapping("/login.html")
+    @RequestMapping("/login")
     public String login(@RequestBody UserDTO dto) {
 
         Authentication authentication = authenticationManager.
                 authenticate(new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
 
-        return "/login.html";
+
+
+        return "/login";
     }
 
 
@@ -58,12 +60,10 @@ public class UserController {
 
     @PostMapping("/registration")
     public String userRegistration(@ModelAttribute("user") UserDTO user){
-        User userToSubmit = new User();
+        UserModel userToSubmit = new UserModel();
         userToSubmit.setEmail(user.getEmail());
         userToSubmit.setFirstName(user.getFirstName());
         userToSubmit.setLastName(user.getLastName());
-        userToSubmit.setRoleName(Collections.singleton("USER"));
-        userToSubmit.setTimeCreated(user.getTimeCreated());
 
         try {
             User userReturned = userService.saveUser(userToSubmit).orElseThrow(
@@ -72,8 +72,7 @@ public class UserController {
             logger.error("Could not save the given user to the database");
             return "redirect:/registration?error=true";
         }
-        logger.info(String.format("User: %s has been registered successfully\nTime: %s", userToSubmit.getUsername(),
-                userToSubmit.getTimeCreated()));
+        logger.info(String.format("User: %s has been registered successfully", userToSubmit.getEmail()));
         return "registration?user-created=true";
     }
     @GetMapping("/home")

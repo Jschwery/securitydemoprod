@@ -6,5 +6,5 @@ import com.jschwery.securitydemo.models.UserModel;
 import java.util.Optional;
 
 public interface UserService {
-    Optional<User> saveUser(User user);
+    Optional<User> saveUser(UserModel user);
 }

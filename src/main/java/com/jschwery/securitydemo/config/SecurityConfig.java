@@ -27,32 +27,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.RememberMeServices;
-import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
-
-import javax.sql.DataSource;
-import javax.xml.crypto.Data;
-
-import static org.springframework.security.config.Customizer.withDefaults;
-
-/*
-//TODO
-if the user is an admin they can remove other users from db
-plus all other features of users
-
-//TODO
-create roles everyone starts as user when account created
-securityfilterchain ->filters http requests and finds out if the user is authorized to access the endpoints
-providermanager -> find out how to manage the different authentication providers with their authorization
-userdetailsservice -> create user
- */
 
 @EnableWebSecurity
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig{
-    UserRepository userRepository;
-    CustomSecurityConfig customProviderConfig;
+    @Autowired
+    DetailService userDetailService;
 
     @Bean
     public PasswordEncoder getPassWordEncoder() {
@@ -60,19 +40,20 @@ public class SecurityConfig{
     }
 
     @Bean
-    public UserDetailsManager usersManager(DataSource dataSource){
-        UserDetails user = User.builder()
-                .username()
+    @Autowired
+    DaoAuthenticationProvider authProvider(PasswordEncoder encoder){
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailService);
+        authProvider.setPasswordEncoder(encoder);
+        return authProvider;
     }
 
     @Bean
-    public AuthenticationManager authManagerBean(UserDetailsService userDetailsService, HttpSecurity security,
-   BCryptPasswordEncoder passwordEncoder) throws Exception {
-        return security.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder)
-                .and()
-                .build();
+    @Autowired
+    public ProviderManager authManagerBean(HttpSecurity security, DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
+        return (ProviderManager) security.getSharedObject(AuthenticationManagerBuilder.class)
+                .authenticationProvider(daoAuthenticationProvider).
+                build();
     }
 
     @Bean
@@ -80,11 +61,10 @@ public class SecurityConfig{
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/css/**", "/js/**", "/registration/**").permitAll()
                 .anyRequest().authenticated())
                 .csrf().disable()
-                .formLogin(form -> form.loginPage("/login")
+                .formLogin().loginPage("/login")
                 .defaultSuccessUrl("/home")
-                .failureForwardUrl("/login-failure?error=true"))
-                .logout().permitAll();
+                .failureUrl("/login-failure");
+
         return http.build();
     }
-
 }

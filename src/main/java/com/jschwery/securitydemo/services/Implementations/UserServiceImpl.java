@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,16 +25,17 @@ public class UserServiceImpl implements UserService {
     UserRepository  userRepository;
 
     @Override
-    public Optional<User> saveUser(User userModel) {
+    public Optional<User> saveUser(UserModel userModel) {
         if(!Objects.equals(userModel.getPassword(), userModel.getMatchPassword())){
             throw new UserException("Passwords do not match");
         }
-        User user = User.builder().
-                email(userModel.getEmail()).
-                firstName(userModel.getFirstName()).
-                lastName(userModel.getLastName()).
-                password(passEncoder.encode(userModel.getPassword())).
-                timeCreated(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))).build();
+        User user = User.builder()
+                .email(userModel.getEmail())
+                .firstName(userModel.getFirstName())
+                .lastName(userModel.getLastName())
+                .password(passEncoder.encode(userModel.getPassword()))
+                .roleName(Set.of("USER"))
+                .timeCreated(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))).build();
         User returnedUser = userRepository.save(user);
         return Optional.of(returnedUser);
     }
