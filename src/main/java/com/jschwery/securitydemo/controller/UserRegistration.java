@@ -1,7 +1,6 @@
 package com.jschwery.securitydemo.controller;
 
 import com.jschwery.securitydemo.entities.User;
-import com.jschwery.securitydemo.event.UserRegisterEmailEvent;
 import com.jschwery.securitydemo.exception.UserException;
 import com.jschwery.securitydemo.model.UserModel;
 import com.jschwery.securitydemo.repository.UserRepository;
@@ -60,8 +59,6 @@ public class UserRegistration {
     @PostMapping("/registration")
     public ResponseEntity<User> userRegistration(@RequestBody UserModel userModel, HttpServletRequest request){
         User user = userService.saveUser(userModel).orElseThrow(() -> new UserException(HttpStatus.BAD_REQUEST, "Unable to register user with given inputs"));
-        userRegisterPublisher.publishEvent(new UserRegisterEmailEvent(user, httpRequestToString(request)));
-
 
         return new ResponseEntity<>(user, HttpStatus.OK);
 
