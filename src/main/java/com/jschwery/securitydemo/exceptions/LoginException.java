@@ -1,23 +1,25 @@
-package com.jschwery.securitydemo.exception;
+package com.jschwery.securitydemo.exceptions;
 
 import org.springframework.http.HttpStatus;
 
-public class UserException extends RuntimeException {
-    public UserException(){
+public class LoginException extends RuntimeException{
+
+    public LoginException(){
         super();
-   }
+    }
+
     private HttpStatus status = null;
 
     private Object data = null;
 
 
-    public UserException(
+    public LoginException(
             String message
     ) {
         super(message);
     }
 
-    public UserException(
+    public LoginException(
             HttpStatus status,
             String message
     ) {
@@ -25,7 +27,7 @@ public class UserException extends RuntimeException {
         this.status = status;
     }
 
-    public UserException(
+    public LoginException(
             HttpStatus status,
             String message,
             Object data) {
