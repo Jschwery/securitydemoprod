@@ -1,83 +1,91 @@
 package com.jschwery.securitydemo.controllers;
 
+import com.jschwery.securitydemo.entities.UserRegistrationForm;
 import com.jschwery.securitydemo.dtos.UserDTO;
 import com.jschwery.securitydemo.entities.User;
-import com.jschwery.securitydemo.exceptions.UserException;
-import com.jschwery.securitydemo.models.UserModel;
-import com.jschwery.securitydemo.security.DetailService;
-import com.jschwery.securitydemo.security.UserPrincipal;
 import com.jschwery.securitydemo.services.UserService;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
+import javax.validation.Valid;
 
-@RestController
-@RequestMapping("/user")
+@Controller
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class UserController {
 
-
-
     Logger logger = LoggerFactory.getLogger(UserController.class);
+    @Autowired
     UserService userService;
     private final ProviderManager authenticationManager;
 
+    public UserController(ProviderManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
 
-    @RequestMapping("/login")
-    public String login(@RequestBody UserDTO dto) {
-
-        Authentication authentication = authenticationManager.
-                authenticate(new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
-
-
-
+    @GetMapping("/login")
+    public String login(Model model) {
+        UserDTO userModel = new UserDTO();
+        model.addAttribute("userLogin", new UserDTO());
         return "/login";
     }
+    @PostMapping("/login")
+    public String login(@ModelAttribute("userLogin") UserDTO userDto) {
 
+        Authentication authentication = authenticationManager.
+                authenticate(new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
 
-    @GetMapping("/registration")
-    public String userResponseEntity(Model model, UserDTO userDTO) {
-        model.addAttribute("userDTO", userDTO);
-        return "registration";
-    }
-
-    @PostMapping("/registration")
-    public String userRegistration(@ModelAttribute("user") UserDTO user){
-        UserModel userToSubmit = new UserModel();
-        userToSubmit.setEmail(user.getEmail());
-        userToSubmit.setFirstName(user.getFirstName());
-        userToSubmit.setLastName(user.getLastName());
-
-        try {
-            User userReturned = userService.saveUser(userToSubmit).orElseThrow(
-                    () -> new UserException(HttpStatus.BAD_REQUEST, "Unable to register user with given inputs"));
-        }catch (UserException e){
-            logger.error("Could not save the given user to the database");
-            return "redirect:/registration?error=true";
+        if (authentication.isAuthenticated()) {
+            return "/home/" + userDto.getUsername();
         }
-        logger.info(String.format("User: %s has been registered successfully", userToSubmit.getEmail()));
-        return "registration?user-created=true";
+        return "/login?error";
     }
-    @GetMapping("/home")
-    @PreAuthorize("hasAnyRole('USER','ADMIN','SUPER_ADMIN')")
-    public String getUserHome(Model model){
-        return "home";
+
+        @Autowired
+        private PasswordEncoder passwordEncoder;
+
+        @GetMapping("/register")
+        public String showRegistrationForm(Model model) {
+            UserRegistrationForm registrationForm = new UserRegistrationForm();
+            model.addAttribute("registrationForm", registrationForm);
+            System.out.println("Registration form: " + registrationForm);
+            return "registration";
+        }
+
+        @PostMapping("/register")
+        public String handleRegistration(@ModelAttribute @Valid UserRegistrationForm userRegistrationForm,
+                                         BindingResult bindingResult) {
+            if (bindingResult.hasErrors()) {
+                return "registration";
+            }
+
+            User user = new User();
+            user.setEmail(userRegistrationForm.getUsername());
+            user.setPassword(passwordEncoder.encode(userRegistrationForm.getPassword()));
+            user.setFirstName(userRegistrationForm.getFirstName());
+            user.setLastName(userRegistrationForm.getLastName());
+
+            UserDTO userDTO = new UserDTO();
+            userDTO.setUsername(user.getEmail());
+            userDTO.setPassword(user.getPassword());
+            userDTO.setFirstName(user.getFirstName());
+            userDTO.setLastName(user.getLastName());
+            userService.saveUser(userDTO);
+            return "redirect:/login";
+        }
     }
-}
+
+
+
+
+
+

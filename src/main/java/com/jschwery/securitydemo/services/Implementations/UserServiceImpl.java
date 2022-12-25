@@ -1,13 +1,11 @@
 package com.jschwery.securitydemo.services.Implementations;
 
+import com.jschwery.securitydemo.dtos.UserDTO;
 import com.jschwery.securitydemo.entities.User;
 import com.jschwery.securitydemo.exceptions.UserException;
-import com.jschwery.securitydemo.models.UserModel;
 import com.jschwery.securitydemo.repositories.UserRepository;
 import com.jschwery.securitydemo.services.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,15 +23,12 @@ public class UserServiceImpl implements UserService {
     UserRepository  userRepository;
 
     @Override
-    public Optional<User> saveUser(UserModel userModel) {
-        if(!Objects.equals(userModel.getPassword(), userModel.getMatchPassword())){
-            throw new UserException("Passwords do not match");
-        }
+    public Optional<User> saveUser(UserDTO userDTO) {
         User user = User.builder()
-                .email(userModel.getEmail())
-                .firstName(userModel.getFirstName())
-                .lastName(userModel.getLastName())
-                .password(passEncoder.encode(userModel.getPassword()))
+                .email(userDTO.getUsername())
+                .firstName(userDTO.getFirstName())
+                .lastName(userDTO.getLastName())
+                .password(passEncoder.encode(userDTO.getPassword()))
                 .roleName(Set.of("USER"))
                 .timeCreated(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))).build();
         User returnedUser = userRepository.save(user);
