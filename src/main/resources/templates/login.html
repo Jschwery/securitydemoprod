@@ -13,16 +13,16 @@
     <div class="row justify-content-md-center mt-3">
         <div class="col-4">
             <h3 class="fw-normal mb-3 pb-3 text-center" style="letter-spacing: 1px;">Log in</h3>
-            <form>
+            <form th:action="@{/login}" th:object="${userLogin}" method="POST">
                 <!-- Email input -->
                 <div class="form-outline mb-4">
-                    <input type="email" id="form2r1" class="form-control" />
+                    <input type="email" id="form2r1" th:field="*{username}"  class="form-control" />
                     <label class="form-label" for="form2r1">Email address</label>
                 </div>
 
                 <!-- Password input -->
                 <div class="form-outline mb-4">
-                    <input type="password" id="form2r2" class="form-control" />
+                    <input type="password" id="form2r2" th:field="*{password}" class="form-control" />
                     <label class="form-label" for="form2r2">Password</label>
                 </div>
 

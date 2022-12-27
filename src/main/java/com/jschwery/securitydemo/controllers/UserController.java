@@ -11,6 +11,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,13 +40,13 @@ public class UserController {
         return "/login";
     }
     @PostMapping("/login")
-    public String login(@ModelAttribute("userLogin") UserDTO userDto) {
+    public String login(@Valid @ModelAttribute("userLogin") UserDTO userDto, BindingResult bindingResult) {
 
         Authentication authentication = authenticationManager.
                 authenticate(new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
-
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         if (authentication.isAuthenticated()) {
-            return "/home/" + userDto.getUsername();
+            return "redirect:/home/" + userDto.getUsername();
         }
         return "/login?error";
     }
