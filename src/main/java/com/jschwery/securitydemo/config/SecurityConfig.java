@@ -58,12 +58,12 @@ public class SecurityConfig{
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/css/**", "/js/**", "/registration/**", "/register/**").permitAll()
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/css/**", "/js/**", "/registration/**", "/register/**", "/practice/**").permitAll()
                 .anyRequest().authenticated())
                 .csrf().disable()
                 .formLogin().loginPage("/login")
                 .defaultSuccessUrl("/home")
-                .failureUrl("/login-failure");
+                .failureUrl("/login");
 
         return http.build();
     }

@@ -1,3 +1,4 @@
+
 .btn-google{
   background-color: rgb(79, 121, 66, .05);
   border: 1px solid black;
@@ -8,7 +9,8 @@
   display: inline-block;
   cursor: pointer;
   border-radius: 16px;
-}
+  }
+
 .btn-login{
     background-color: rgb(79, 121, 66,.9);
     border-radius: 16px;

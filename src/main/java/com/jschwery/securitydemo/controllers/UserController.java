@@ -3,6 +3,9 @@ package com.jschwery.securitydemo.controllers;
 import com.jschwery.securitydemo.entities.UserRegistrationForm;
 import com.jschwery.securitydemo.dtos.UserDTO;
 import com.jschwery.securitydemo.entities.User;
+import com.jschwery.securitydemo.exceptions.UserException;
+import com.jschwery.securitydemo.repositories.UserRepository;
+import com.jschwery.securitydemo.services.Implementations.UserServiceImpl;
 import com.jschwery.securitydemo.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,8 @@ public class UserController {
     Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     UserService userService;
+    @Autowired
+    UserRepository repository;
     private final ProviderManager authenticationManager;
 
     public UserController(ProviderManager authenticationManager) {
@@ -40,6 +45,7 @@ public class UserController {
         model.addAttribute("userLogin", new UserDTO());
         return "/login";
     }
+
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute("userLogin") UserDTO userDto, BindingResult bindingResult) {
 
@@ -49,7 +55,7 @@ public class UserController {
         if (authentication.isAuthenticated()) {
             return "redirect:/home/" + userDto.getUsername();
         }
-        return "/login?error";
+        return "/login";
     }
 
         @Autowired
@@ -61,6 +67,16 @@ public class UserController {
             model.addAttribute("registrationForm", registrationForm);
             System.out.println("Registration form: " + registrationForm);
             return "registration";
+        }
+
+        @GetMapping("/home/{username}")
+        public String userHome(@PathVariable String username, Model model){
+            User user = repository.findByUsername(username).orElseThrow(() -> {
+                return new UserException(String.format("Could not find user %s", username));
+            });
+            model.addAttribute("user", user);
+
+            return "/home";
         }
 
         @PostMapping("/register")
