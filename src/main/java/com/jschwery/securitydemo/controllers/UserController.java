@@ -19,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Set;
 
 @Controller
 @EnableMethodSecurity
@@ -69,18 +70,19 @@ public class UserController {
                 return "registration";
             }
 
-            User user = new User();
-            user.setEmail(userRegistrationForm.getUsername());
-            user.setPassword(passwordEncoder.encode(userRegistrationForm.getPassword()));
-            user.setFirstName(userRegistrationForm.getFirstName());
-            user.setLastName(userRegistrationForm.getLastName());
-
             UserDTO userDTO = new UserDTO();
-            userDTO.setUsername(user.getEmail());
-            userDTO.setPassword(user.getPassword());
-            userDTO.setFirstName(user.getFirstName());
-            userDTO.setLastName(user.getLastName());
-            userService.saveUser(userDTO);
+            userDTO.setEmail(userRegistrationForm.getUsername());
+            userDTO.setPassword(passwordEncoder.encode(userRegistrationForm.getPassword()));
+            userDTO.setFirstName(userRegistrationForm.getFirstName());
+            userDTO.setLastName(userRegistrationForm.getLastName());
+            userDTO.setRoleName(Set.of("ROLE_USER"));
+            User users = new User();
+            users.setUsername(userDTO.getEmail());
+            users.setPassword(userDTO.getPassword());
+            users.setFirstName(userDTO.getFirstName());
+            users.setLastName(userDTO.getLastName());
+            users.setRoleName(userDTO.getRoleName());
+            userService.saveUser(users);
             return "redirect:/login";
         }
     }

@@ -1,24 +1,51 @@
-
 .btn-google{
-  background-color: #FFFFFF;
+  background-color: rgb(79, 121, 66, .05);
   border: 1px solid black;
   color: black;
   padding: 10px 20px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  margin: 4px 2px;
   cursor: pointer;
   border-radius: 16px;
 }
-
-@media (min-width: 768px){
-.colorBg{
-background-color: #439505;
-    }
+.btn-login{
+    background-color: rgb(79, 121, 66,.9);
+    border-radius: 16px;
+    border: 1px solid black;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: inline-block;
+    cursor: pointer;
 }
+.btn-login:hover{
+    background-color: rgb(79, 121, 66,.7);
+    border-radius: 16px;
+    border: 1px solid black;
+    color: white;
+    padding: 10px 20px;
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+
+}
+
+.btn-google:hover{
+    background-color: rgb(79, 121, 66, .8);
+    text-align: center;
+    opacity: .75;
+    color: black;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 16px;
+    padding: 10px 20px;
+    border: 1px solid black;
+}
+/*
 @media (min-width: 768px){
 .s{
 background-color: #990000;
     }
-}
+}*/

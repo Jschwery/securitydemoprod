@@ -1,29 +1,31 @@
 package com.jschwery.securitydemo.services.Implementations;
 
-import com.jschwery.securitydemo.dtos.UserDTO;
 import com.jschwery.securitydemo.entities.User;
-import com.jschwery.securitydemo.exceptions.UserException;
 import com.jschwery.securitydemo.repositories.UserRepository;
 import com.jschwery.securitydemo.services.UserService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     PasswordEncoder passEncoder;
     UserRepository  userRepository;
 
+    @Autowired
+    UserServiceImpl(PasswordEncoder encoder, UserRepository repository){
+        this.passEncoder = encoder;
+        this.userRepository = repository;
+    }
     @Override
-    public Optional<User> saveUser(UserDTO userDTO) {
+    public Optional<User> saveUser(User userDTO) {
         User user = User.builder()
                 .email(userDTO.getUsername())
                 .firstName(userDTO.getFirstName())

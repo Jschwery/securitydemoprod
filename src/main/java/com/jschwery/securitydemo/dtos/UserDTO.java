@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -18,4 +19,5 @@ public class UserDTO {
     private String email;
     private String firstName;
     private String lastName;
+    private Set<String> roleName;
 }

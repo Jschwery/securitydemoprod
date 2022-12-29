@@ -4,67 +4,53 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>Login</title>
-    <link th:href = "@{/css/main.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-          crossorigin="anonymous" />
+          crossorigin="anonymous"/>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row justify-content-center mt-3 colorBg">
-        <div class="col-4">
-            <h3 class="fw-normal mb-3 pb-3 text-center" style="letter-spacing: 1px;">Log in</h3>
-            <form th:action="@{/login}" th:object="${userLogin}" method="POST">
-                <!-- Email input -->
-                <div class="form-outline mb-4">
-                    <input type="email" id="form2r1" th:field="*{username}"  class="form-control" />
-                    <label class="form-label" for="form2r1">Email address</label>
-                </div>
+<div class="vh-100 g-0" style="background-image: linear-gradient(rgba(79, 121,66,.37), rgb(79,121,66,1));">
+    <div class="container-fluid">
+        <div class="row justify-content-center mt-3 colorBg">
+            <div class="col-md-5 col-sm-6 col-lg-5">
+                <h3 class="fw-normal mb-3 mt-3 pt-3 pb-3 text-center" style="letter-spacing: 1px;">Log in</h3>
+                <form th:action="@{/login}" th:object="${userLogin}" method="POST">
+                    <!-- Email input -->
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form2r1">Email address</label>
+                        <input type="email" id="form2r1" th:field="*{username}" class="form-control"/>
+                    </div>
 
-                <!-- Password input -->
-                <div class="form-outline mb-4">
-                    <input type="password" id="form2r2" th:field="*{password}" class="form-control" />
-                    <label class="form-label" for="form2r2">Password</label>
-                </div>
+                    <!-- Password input -->
+                    <div class="form-outline mb-4">
+                        <label class="form-label" for="form2r2">Password</label>
+                        <input type="password" id="form2r2" th:field="*{password}" class="form-control"/>
+                    </div>
 
-                <!-- 2 column grid layout for inline styling -->
-                <div class="row mb-4">
-                    <div class="col d-flex justify-content-start">
-                        <!-- Checkbox -->
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="" id="form2r3" checked />
-                            <label class="form-check-label" for="form2r3"> Remember me </label>
+                    <!-- Submit button -->
+                    <button type="submit" class="btn-login btn-block mb-4">Sign in</button>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <a class="btn-lg btn-google btn-block" style="display: flex; align-items: center;" href="#">
+                                <ion-icon style="margin-right: 15px;" name="logo-google"></ion-icon>
+                                Continue with Google</a>
+
                         </div>
                     </div>
-                </div>
-
-                <!-- Submit button -->
-                <button type="submit" class="btn btn-primary btn-block mb-4">Sign in</button>
-                <div class="row">
-                    <div class="col-md-12">
-                        <a class="btn btn-lg btn-google btn-block" href="#"><img src="https://img.icons8.com/color/16/000000/google-logo.png"> Signup Using Google</a>
-
+                    <!-- Register buttons -->
+                    <div class="row text-center">
+                        <div class="col-auto">
+                            <p>Not a member? <a th:href="@{/register}">Register</a></p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Register buttons -->
-                <div class="text-center">
-                    <p>Not a member? <a th:href="@{/register}">Register</a></p>
-                    <p>or sign up with:</p>
-
-                    <a href="https://www.google.com/" class="mx-1 btn">
-                        <ion-icon size="large" name="logo-google"></ion-icon>
-                    </a>
-                    <a href="https://www.github.com/" class="mx-1 btn">
-                        <ion-icon size="large" name="logo-github"></ion-icon>
-                    </a>
-
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 </body>
+
 </html>
