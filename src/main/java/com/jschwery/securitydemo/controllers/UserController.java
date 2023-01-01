@@ -1,12 +1,13 @@
 package com.jschwery.securitydemo.controllers;
 
-import com.jschwery.securitydemo.entities.UserRegistrationForm;
 import com.jschwery.securitydemo.dtos.UserDTO;
 import com.jschwery.securitydemo.entities.User;
+import com.jschwery.securitydemo.entities.UserRegistrationForm;
 import com.jschwery.securitydemo.exceptions.UserException;
+import com.jschwery.securitydemo.exceptions.UserExistsAlreadyException;
 import com.jschwery.securitydemo.repositories.UserRepository;
-import com.jschwery.securitydemo.services.Implementations.UserServiceImpl;
 import com.jschwery.securitydemo.services.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import java.util.Set;
 
 @Controller
 @EnableMethodSecurity
+@Slf4j
 public class UserController {
 
     Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -40,32 +42,34 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(Model model, @RequestParam(required = false) boolean registrationSuccess) {
         UserDTO userModel = new UserDTO();
         model.addAttribute("userLogin", new UserDTO());
+        model.addAttribute("registrationSuccess", registrationSuccess);
         return "/login";
     }
 
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute("userLogin") UserDTO userDto, BindingResult bindingResult) {
-
+        System.out.println(userDto);
         Authentication authentication = authenticationManager.
                 authenticate(new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         if (authentication.isAuthenticated()) {
             return "redirect:/home/" + userDto.getUsername();
         }
-        return "/login";
+        return "login";
     }
 
         @Autowired
         private PasswordEncoder passwordEncoder;
 
         @GetMapping("/register")
-        public String showRegistrationForm(Model model) {
+        public String showRegistrationForm(Model model, @RequestParam(required = false) boolean registrationError) {
             UserRegistrationForm registrationForm = new UserRegistrationForm();
             model.addAttribute("registrationForm", registrationForm);
-            System.out.println("Registration form: " + registrationForm);
+            model.addAttribute("registerError", registrationError);
+
             return "registration";
         }
 
@@ -76,35 +80,37 @@ public class UserController {
             });
             model.addAttribute("user", user);
 
-            return "/home";
+            return "home";
         }
 
         @PostMapping("/register")
         public String handleRegistration(@ModelAttribute @Valid UserRegistrationForm userRegistrationForm,
                                          BindingResult bindingResult) {
             if (bindingResult.hasErrors()) {
-                return "registration";
+                return "redirect:/register?error=true";
             }
 
             UserDTO userDTO = new UserDTO();
-            userDTO.setEmail(userRegistrationForm.getUsername());
+            userDTO.setEmail(userRegistrationForm.getEmail());
             userDTO.setPassword(passwordEncoder.encode(userRegistrationForm.getPassword()));
             userDTO.setFirstName(userRegistrationForm.getFirstName());
             userDTO.setLastName(userRegistrationForm.getLastName());
             userDTO.setRoleName(Set.of("ROLE_USER"));
+            userDTO.setUsername(userRegistrationForm.getUsername());
+
             User users = new User();
-            users.setUsername(userDTO.getEmail());
+            users.setUsername(userDTO.getUsername());
+            users.setEmail(userDTO.getEmail());
             users.setPassword(userDTO.getPassword());
             users.setFirstName(userDTO.getFirstName());
             users.setLastName(userDTO.getLastName());
             users.setRoleName(userDTO.getRoleName());
-            userService.saveUser(users);
-            return "redirect:/login";
+            try {
+                userService.saveUser(users);
+            }catch (Exception e){
+                logger.warn(String.format("User already exists with the username: %s", users.getUsername()));
+                throw new UserExistsAlreadyException(String.format("User already exists with the username: %s", users.getUsername()));
+            }
+            return "redirect:/login?registrationSuccess=true";
         }
     }
-
-
-
-
-
-

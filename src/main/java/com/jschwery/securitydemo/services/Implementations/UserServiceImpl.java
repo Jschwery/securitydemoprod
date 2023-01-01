@@ -1,6 +1,7 @@
 package com.jschwery.securitydemo.services.Implementations;
 
 import com.jschwery.securitydemo.entities.User;
+import com.jschwery.securitydemo.exceptions.UserException;
 import com.jschwery.securitydemo.repositories.UserRepository;
 import com.jschwery.securitydemo.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,18 @@ public class UserServiceImpl implements UserService {
         this.userRepository = repository;
     }
     @Override
-    public Optional<User> saveUser(User userDTO) {
+    public User saveUser(User userDTO) {
         User user = User.builder()
                 .email(userDTO.getUsername())
                 .firstName(userDTO.getFirstName())
                 .lastName(userDTO.getLastName())
                 .password(passEncoder.encode(userDTO.getPassword()))
-                .roleName(Set.of("USER"))
+                .username(userDTO.getUsername())
+                .roleName(Set.of("ROLE_USER"))
                 .timeCreated(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()))).build();
-        User returnedUser = userRepository.save(user);
-        return Optional.of(returnedUser);
+            User returnedUser = userRepository.save(user);
+            return Optional.of(returnedUser).orElseThrow(() -> new UserException("User entered already exists"));
+
     }
 
 

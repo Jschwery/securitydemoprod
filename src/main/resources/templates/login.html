@@ -10,6 +10,7 @@
           crossorigin="anonymous"/>
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script th:src="@{/js/hide-message.js}"></script>
 </head>
 <body >
 <section class="vh-100 m-0" >
@@ -21,12 +22,17 @@
     </div>
 <div class="h-100" style="background-image: linear-gradient(rgba(79, 121,66,.37), rgb(79,121,66,1));" >
     <div class="container h-100" >
+        <div class="row justify-content-center" th:if="${registrationSuccess}">
+            <div class="alert alert-success" role="alert" id="success-message">
+                Registration Success!
+            </div>
+        </div>
         <div class="row justify-content-center colorBg">
             <div class="col-md-7 col-sm-8 col-lg-5 col-xs-10">
                 <form th:action="@{/login}" th:object="${userLogin}" method="POST">
                     <!-- Email input -->
                     <div class="form-outline mb-4">
-                        <label class="form-label" for="form2r1">Email address</label>
+                        <label class="form-label" for="form2r1">Username</label>
                         <input type="email" id="form2r1" th:field="*{username}" class="form-control"/>
                     </div>
 

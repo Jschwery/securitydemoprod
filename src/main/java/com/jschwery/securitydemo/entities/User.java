@@ -16,7 +16,10 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "Users")
+@Table(name = "Users", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"email"}),
+        @UniqueConstraint(columnNames = {"username"})
+})
 public class User {
 
     @SequenceGenerator(name = "user_sequence_gen",
@@ -32,5 +35,4 @@ public class User {
     String firstName;
     String lastName;
     Set<String> roleName;
-
 }

@@ -28,7 +28,9 @@ public class CustomSecurityConfig implements AuthenticationProvider {
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
         User user = userRepository.findByUsername(username).orElseThrow(()->  new UsernameNotFoundException("User not found"));
+        System.out.println(user);
         if(Objects.equals(username, user.getEmail()) && Objects.equals(password, user.getPassword())){
+            System.out.println("worked here");
             return new UsernamePasswordAuthenticationToken(userDetailsService.loadUserByUsername(username),
                     userDetailsService.loadUserByUsername(username).getPassword(), userDetailsService.loadUserByUsername(username).getAuthorities());
         }else {
