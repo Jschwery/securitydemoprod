@@ -75,6 +75,11 @@
                                             <input type="password" id="matchPassword" th:field="*{matchPassword}" class="form-control" placeholder="Re-enter Password"/>
                                             <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="alert alert-danger"></p>
                                         </div>
+                                        <div>
+                                            <ul>
+                                                <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                                            </ul>
+                                        </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-4 d-flex justify-content-right text-center p-xl-2 mb-3 mb-lg-4">
