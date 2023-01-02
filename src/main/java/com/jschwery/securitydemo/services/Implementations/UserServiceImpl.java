@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User saveUser(User userDTO) {
         User user = User.builder()
-                .email(userDTO.getUsername())
+                .email(userDTO.getEmail())
                 .firstName(userDTO.getFirstName())
                 .lastName(userDTO.getLastName())
                 .password(passEncoder.encode(userDTO.getPassword()))

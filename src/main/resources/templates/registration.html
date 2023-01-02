@@ -21,53 +21,59 @@
                                 <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
                                 <form id="register-submit" th:action="@{/register}" method="POST" th:object="${registrationForm}" class="mx-1 mx-md-4">
                                     <div th:if="${registerError}">
-                                        <p>Hello error occurred</p>
+                                        <p class="alert alert-danger" role="alert" th:text="${errorMessage}"></p>
                                     </div>
                                     <div class="d-flex flex-row align-items-center mb-4">
                                         <i class="fas fa-user fa-lg me-3 fa-fw"></i>
                                         <div class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="firstName">Name</label>
-                                            <input type="text" id="firstName" th:field="*{firstName}" class="form-control"/>
+                                            <input type="text" id="firstName" th:field="*{firstName}" class="form-control" placeholder="First name"/>
                                         </div>
-
+                                        <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="alert alert-warning"></div>
                                     </div>
                                     <div class="d-flex flex-row align-items-center mb-4">
                                         <i class="fas fa-user fa-lg me-3 fa-fw"></i>
                                         <div class="form-outline flex-fill mb-0">
-                                            <label class="form-label" for="lastName">Last Name</label>
-                                            <input type="text" id="lastName" th:field="*{lastName}" class="form-control"/>
+                                            <label class="form-label" for="lastName">Last name</label>
+                                            <input type="text" id="lastName" th:field="*{lastName}" class="form-control" placeholder="Last name"/>
                                         </div>
+                                        <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="alert alert-warning"></div>
                                     </div>
 
                                     <div class="d-flex flex-row align-items-center mb-4">
                                         <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
                                         <div class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="email">Email</label>
-                                            <input type="email" id="email" th:field="*{email}" class="form-control"/>
+                                            <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="Email"/>
                                         </div>
+                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="alert alert-warning"></div>
                                     </div>
 
                                     <div class="d-flex flex-row align-items-center mb-4">
                                         <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
                                         <div class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="username">Username</label>
-                                            <input type="text" id="username" th:field="*{username}" class="form-control"/>
+                                            <input type="text" id="username" th:field="*{username}" class="form-control" placeholder="Username"/>
                                         </div>
+                                        <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="alert alert-warning"></div>
+
                                     </div>
 
                                     <div class="d-flex flex-row align-items-center mb-4">
                                         <i class="fas fa-lock fa-lg me-3 fa-fw"></i>
                                         <div class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="password">Password</label>
-                                            <input type="password" id="password" th:field="*{password}" class="form-control"/>
+                                            <input type="password" id="password" th:field="*{password}" class="form-control" placeholder="Password"/>
                                         </div>
+                                        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="alert alert-warning"></div>
                                     </div>
 
                                     <div class="d-flex flex-row align-items-center mb-4">
                                         <i class="fas fa-key fa-lg me-3 fa-fw"></i>
                                         <div class="form-outline flex-fill mb-0">
                                             <label class="form-label" for="matchPassword">Re-enter Password</label>
-                                            <input type="password" id="matchPassword" th:field="*{matchPassword}" class="form-control"/>
+                                            <input type="password" id="matchPassword" th:field="*{matchPassword}" class="form-control" placeholder="Re-enter Password"/>
+                                            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="alert alert-danger"></p>
                                         </div>
                                     </div>
                                     <div class="row">

@@ -4,7 +4,6 @@ import com.jschwery.securitydemo.dtos.UserDTO;
 import com.jschwery.securitydemo.entities.User;
 import com.jschwery.securitydemo.entities.UserRegistrationForm;
 import com.jschwery.securitydemo.exceptions.UserException;
-import com.jschwery.securitydemo.exceptions.UserExistsAlreadyException;
 import com.jschwery.securitydemo.repositories.UserRepository;
 import com.jschwery.securitydemo.services.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,6 +29,9 @@ import java.util.Set;
 @EnableMethodSecurity
 @Slf4j
 public class UserController {
+
+    //TODO field validation
+    //if finish then research more on getting logger to work maybe use log4j instead of logback?
 
     Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
@@ -83,34 +86,47 @@ public class UserController {
             return "home";
         }
 
-        @PostMapping("/register")
-        public String handleRegistration(@ModelAttribute @Valid UserRegistrationForm userRegistrationForm,
-                                         BindingResult bindingResult) {
-            if (bindingResult.hasErrors()) {
-                return "redirect:/register?error=true";
+    @PostMapping("/register")
+    public String handleRegistration(@ModelAttribute @Valid UserRegistrationForm userRegistrationForm, BindingResult result, Model model) {
+
+            if(result.hasErrors()){
+                model.addAttribute("registrationForm", userRegistrationForm);
+                return "registration";
             }
 
-            UserDTO userDTO = new UserDTO();
-            userDTO.setEmail(userRegistrationForm.getEmail());
-            userDTO.setPassword(passwordEncoder.encode(userRegistrationForm.getPassword()));
-            userDTO.setFirstName(userRegistrationForm.getFirstName());
-            userDTO.setLastName(userRegistrationForm.getLastName());
-            userDTO.setRoleName(Set.of("ROLE_USER"));
-            userDTO.setUsername(userRegistrationForm.getUsername());
+        UserDTO userDTO = new UserDTO();
+        userDTO.setEmail(userRegistrationForm.getEmail());
+        userDTO.setPassword(passwordEncoder.encode(userRegistrationForm.getPassword()));
+        userDTO.setFirstName(userRegistrationForm.getFirstName());
+        userDTO.setLastName(userRegistrationForm.getLastName());
+        userDTO.setRoleName(Set.of("ROLE_USER"));
+        userDTO.setUsername(userRegistrationForm.getUsername());
 
-            User users = new User();
-            users.setUsername(userDTO.getUsername());
-            users.setEmail(userDTO.getEmail());
-            users.setPassword(userDTO.getPassword());
-            users.setFirstName(userDTO.getFirstName());
-            users.setLastName(userDTO.getLastName());
-            users.setRoleName(userDTO.getRoleName());
-            try {
-                userService.saveUser(users);
-            }catch (Exception e){
+        User users = new User();
+        users.setUsername(userDTO.getUsername());
+        users.setEmail(userDTO.getEmail());
+        users.setPassword(userDTO.getPassword());
+        users.setFirstName(userDTO.getFirstName());
+        users.setLastName(userDTO.getLastName());
+        users.setRoleName(userDTO.getRoleName());
+        try {
+            userService.saveUser(users);
+            System.out.println(repository.findByEmail(users.getEmail()));
+        } catch (Exception e) {
+            if (repository.findByUsername(users.getUsername()).isPresent()
+                    && repository.findByEmail(users.getEmail()).isPresent()){
+                logger.warn(String.format("User already exists with the username: %s and the email: %s",
+                        users.getUsername(), users.getEmail()));
+                throw new UserException(String.format("User already exists with the username: %s and the email: %s",
+                        users.getUsername(), users.getEmail()));
+            } else if (repository.findByUsername(users.getUsername()).isPresent()) {
                 logger.warn(String.format("User already exists with the username: %s", users.getUsername()));
-                throw new UserExistsAlreadyException(String.format("User already exists with the username: %s", users.getUsername()));
+                throw new UserException(String.format("User already exists with the username: %s", users.getUsername()));
+            } else if (repository.findByEmail(users.getEmail()).isPresent()) {
+                logger.warn(String.format("User already exists with the email: %s", users.getEmail()));
+                throw new UserException(String.format("User already exists with the email: %s", users.getEmail()));
             }
-            return "redirect:/login?registrationSuccess=true";
+        }
+        return "redirect:/login?registrationSuccess=true";
         }
     }
