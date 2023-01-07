@@ -27,6 +27,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @EnableWebSecurity
 @Configuration
@@ -57,13 +63,32 @@ public class SecurityConfig{
     }
 
     @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000")); // Allow only example.com as an allowed origin
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE")); // Allow only GET, POST, PUT, and DELETE methods
+        config.setAllowCredentials(true);
+        config.addAllowedHeader("*"); // Allow any header
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", config);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/css/**", "/js/**", "/registration/**", "/register/**", "/practice/**").permitAll()
-                .anyRequest().authenticated())
-                .csrf().disable()
-                .formLogin().loginPage("/login")
+        http
+                .cors()
+                .and()
+                .csrf()
+                .disable()
+                .formLogin()
+                .loginPage("/login")
+                .failureUrl("/login")
                 .defaultSuccessUrl("/home")
-                .failureUrl("/login");
+                .and()
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/css/**", "/js/**", "/registration/**", "/register/**", "/practice/**").permitAll()
+                .anyRequest().authenticated());
+
 
         return http.build();
     }

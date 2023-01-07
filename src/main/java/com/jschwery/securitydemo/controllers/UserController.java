@@ -6,10 +6,13 @@ import com.jschwery.securitydemo.entities.UserRegistrationForm;
 import com.jschwery.securitydemo.exceptions.UserException;
 import com.jschwery.securitydemo.repositories.UserRepository;
 import com.jschwery.securitydemo.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -23,76 +26,63 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Set;
 
 @Controller
 @EnableMethodSecurity
 @Slf4j
+@CrossOrigin
 public class UserController {
 
-    //TODO field validation
-    //if finish then research more on getting logger to work maybe use log4j instead of logback?
-
+    private final ProviderManager authenticationManager;
     Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     UserService userService;
     @Autowired
     UserRepository repository;
-    private final ProviderManager authenticationManager;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     public UserController(ProviderManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
 
     @GetMapping("/login")
-    public String login(Model model, @RequestParam(required = false) boolean registrationSuccess) {
+    public String login(@RequestParam(required = false) boolean registrationSuccess) {
         UserDTO userModel = new UserDTO();
-        model.addAttribute("userLogin", new UserDTO());
-        model.addAttribute("registrationSuccess", registrationSuccess);
+
         return "/login";
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute("userLogin") UserDTO userDto, BindingResult bindingResult) {
-        System.out.println(userDto);
-        Authentication authentication = authenticationManager.
-                authenticate(new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    public void login(@RequestBody UserDTO userDto, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
+
         if (authentication.isAuthenticated()) {
-            return "redirect:/home/" + userDto.getUsername();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            response.sendRedirect("/home");
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendRedirect("/login?error=true");
         }
-        return "login";
     }
 
-        @Autowired
-        private PasswordEncoder passwordEncoder;
 
-        @GetMapping("/register")
-        public String showRegistrationForm(Model model, @RequestParam(required = false) boolean registrationError) {
-            UserRegistrationForm registrationForm = new UserRegistrationForm();
-            model.addAttribute("registrationForm", registrationForm);
-            model.addAttribute("registerError", registrationError);
+    @GetMapping("/home/{username}")
+    public String userHome(@PathVariable String username, HttpServletRequest request, HttpServletResponse response) {
+        User user = repository.findByUsername(username).orElseThrow(() -> {
+            return new UserException(String.format("Could not find user %s", username));
+        });
 
-            return "registration";
-        }
-
-        @GetMapping("/home/{username}")
-        public String userHome(@PathVariable String username, Model model){
-            User user = repository.findByUsername(username).orElseThrow(() -> {
-                return new UserException(String.format("Could not find user %s", username));
-            });
-            model.addAttribute("user", user);
-
-            return "home";
-        }
+        return "home";
+    }
 
     @PostMapping("/register")
-    public String handleRegistration(@ModelAttribute @Valid UserRegistrationForm userRegistrationForm, BindingResult result, Model model) {
-
-            if(result.hasErrors()){
-                model.addAttribute("registrationForm", userRegistrationForm);
-                return "registration";
-            }
+    public ResponseEntity<?> handleRegistration(@RequestBody UserRegistrationForm userRegistrationForm,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) throws IOException {
 
         UserDTO userDTO = new UserDTO();
         userDTO.setEmail(userRegistrationForm.getEmail());
@@ -110,11 +100,14 @@ public class UserController {
         users.setLastName(userDTO.getLastName());
         users.setRoleName(userDTO.getRoleName());
         try {
-            userService.saveUser(users);
-            System.out.println(repository.findByEmail(users.getEmail()));
+            User user = userService.saveUser(users);
+            if(user != null) {
+                response.setStatus(HttpServletResponse.SC_ACCEPTED);
+                return new ResponseEntity<>()
+            }
         } catch (Exception e) {
             if (repository.findByUsername(users.getUsername()).isPresent()
-                    && repository.findByEmail(users.getEmail()).isPresent()){
+                    && repository.findByEmail(users.getEmail()).isPresent()) {
                 logger.warn(String.format("User already exists with the username: %s and the email: %s",
                         users.getUsername(), users.getEmail()));
                 throw new UserException(String.format("User already exists with the username: %s and the email: %s",
@@ -127,6 +120,7 @@ public class UserController {
                 throw new UserException(String.format("User already exists with the email: %s", users.getEmail()));
             }
         }
-        return "redirect:/login?registrationSuccess=true";
-        }
+        response.setStatus(HttpServletResponse.SC_ACCEPTED);
+        response.sendRedirect("/login?registrationSuccess=true");
     }
+}

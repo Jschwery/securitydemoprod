@@ -2,6 +2,7 @@ package com.jschwery.securitydemo.security;
 
 import com.jschwery.securitydemo.entities.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,8 +12,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+@Component
 public class UserPrincipal implements UserDetails {
     User user;
+    @Autowired
     UserPrincipal(User passedInUser){
         this.user = passedInUser;
     }
