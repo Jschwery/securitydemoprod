@@ -2,6 +2,8 @@ package com.jschwery.securitydemo.config;
 
 import com.jschwery.securitydemo.repositories.UserRepository;
 import com.jschwery.securitydemo.security.DetailService;
+import com.jschwery.securitydemo.services.JwtService;
+import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,8 +17,10 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.ProviderManagerBuilder;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +31,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -37,58 +43,29 @@ import java.util.List;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig{
+
     @Autowired
-    DetailService userDetailService;
-
-    @Bean
-    public PasswordEncoder getPassWordEncoder() {
-        return new BCryptPasswordEncoder(15);
-    }
-
-    @Bean
+    JwtAuthenticationFilter jwtFilter;
     @Autowired
-    DaoAuthenticationProvider authProvider(PasswordEncoder encoder){
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailService);
-        authProvider.setPasswordEncoder(encoder);
-        return authProvider;
-    }
+    AuthenticationProvider authProvider;
 
-    @Bean
-    @Autowired
-    public ProviderManager authManagerBean(HttpSecurity security, DaoAuthenticationProvider daoAuthenticationProvider) throws Exception {
-        return (ProviderManager) security.getSharedObject(AuthenticationManagerBuilder.class)
-                .authenticationProvider(daoAuthenticationProvider).
-                build();
-    }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // Allow only example.com as an allowed origin
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE")); // Allow only GET, POST, PUT, and DELETE methods
-        config.setAllowCredentials(true);
-        config.addAllowedHeader("*"); // Allow any header
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
-        return source;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
-                .cors()
-                .and()
                 .csrf()
                 .disable()
-                .formLogin()
-                .loginPage("/login")
-                .failureUrl("/login")
-                .defaultSuccessUrl("/home")
+                .authorizeHttpRequests()
+                .requestMatchers("/api/auth/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
                 .and()
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/css/**", "/js/**", "/registration/**", "/register/**", "/practice/**").permitAll()
-                .anyRequest().authenticated());
-
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authenticationProvider(authProvider)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

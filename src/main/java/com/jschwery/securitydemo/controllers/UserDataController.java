@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @EnableMethodSecurity
-@Slf4j
+//@Slf4j
 @CrossOrigin
 @RequestMapping("/api")
 public class UserDataController {
